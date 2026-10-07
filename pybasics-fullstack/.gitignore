@@ -1,7 +1,0 @@
-backend/venv/
-backend/__pycache__/
-backend/app/__pycache__/
-backend/app/**/__pycache__/
-backend/pybasics_dev.db
-backend/.env
-*.pyc

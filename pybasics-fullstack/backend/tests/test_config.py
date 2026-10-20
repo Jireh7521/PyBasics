@@ -39,7 +39,7 @@ def test_production_accepts_explicit_safe_configuration():
 @pytest.mark.parametrize(
     "overrides, message",
     [
-        ({"secret_key": None}, "SECRET_KEY"),
+        ({"secret_key": ""}, "SECRET_KEY"),
         ({"secret_key": "short"}, "SECRET_KEY"),
         ({"secret_key": "dev-only-insecure-key-change-me"}, "SECRET_KEY"),
         ({"database_url": ""}, "DATABASE_URL"),

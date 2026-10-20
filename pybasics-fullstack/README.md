@@ -123,24 +123,54 @@ genuine improvement over the old per-browser version. The PDF itself is still
 generated client-side with jsPDF (drawing it is a presentation concern, not
 something that needs grading or secrecy).
 
-## Running it locally
+## Reproducible local setup
+
+**Supported baseline: Python 3.11.** The dependency versions are pinned in
+`backend/requirements.txt`. Use a clean checkout and run these commands from
+the repository root:
 
 ```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env            # local SQLite defaults; no secret is stored in the example file
+cd pybasics-fullstack/backend
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+cp .env.example .env
 uvicorn app.main:app --reload
 ```
 
-Open **http://127.0.0.1:8000** — that one URL serves both the UI and the API.
-The example `.env` configures a local SQLite database, so you don't need
-Postgres running locally just to try it out. Code execution remains disabled by default. A temporary signing key is generated
-for local development; generate and set `SECRET_KEY` in your local `.env` if you
-want sessions to survive application restarts. Run the automated tests and
-complete the manual signup → course → exam → certificate flow before treating
-the setup as verified.
+On Windows PowerShell, use `.venv\\Scripts\\Activate.ps1` instead of the
+`source` command, and copy the example with `Copy-Item .env.example .env`.
+If your Python command is named `python` rather than `python3.11`, confirm
+`python --version` reports Python 3.11 before creating the environment.
+
+The example environment uses a local SQLite file and sets
+`CODE_EXECUTION_ENABLED=false`; PostgreSQL is not needed for local startup.
+The development signing key is generated temporarily. If you need sessions to
+survive restarts, generate a unique key with the command in the production
+configuration section and put it only in your untracked local `.env`. Never
+commit `.env` or real credentials.
+
+With the server running, check these URLs in a browser or with `curl`:
+
+- `http://127.0.0.1:8000/health` — process liveness response
+  (`{"status":"ok"}`; it does not test database readiness).
+- `http://127.0.0.1:8000/` — frontend HTML.
+- `http://127.0.0.1:8000/assets/app.js` and
+  `http://127.0.0.1:8000/assets/style.css` — frontend assets.
+
+To run the backend regression and startup smoke tests, open a second terminal,
+activate the same virtual environment, then run:
+
+```bash
+cd pybasics-fullstack/backend
+python -m pytest -q
+```
+
+The CI workflow uses Python 3.11 and runs the same test command. A successful
+automated smoke test confirms the root page and assets are served; it does not
+replace manually exercising signup, course progress, exams, or certificates.
+Record those manual checks only after actually performing them on your machine.
 
 ## Production configuration safety
 

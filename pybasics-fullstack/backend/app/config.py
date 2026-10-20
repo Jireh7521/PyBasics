@@ -1,5 +1,5 @@
-from functools import lru_cache
 import secrets
+from functools import lru_cache
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -16,14 +16,14 @@ _INSECURE_SECRETS = {
 
 
 class Settings(BaseSettings):
-    app_env: str = "development"
-    database_url: str = "sqlite:///./pybasics_dev.db"
+    app_env: str
+    database_url: str
     # Convenient for local development only; production validation rejects it.
     # Generate an ephemeral development key instead of embedding a fixed secret.
     # Set SECRET_KEY in the local .env file if sessions should survive restarts.
     secret_key: str = Field(default_factory=secrets.token_urlsafe)
-    access_token_expire_minutes: int = 720
-    cors_origins: str = "http://localhost:8000,http://127.0.0.1:8000"
+    access_token_expire_minutes: int
+    cors_origins: str
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

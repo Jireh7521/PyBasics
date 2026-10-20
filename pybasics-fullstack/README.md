@@ -139,7 +139,7 @@ uvicorn app.main:app --reload
 ```
 
 Open **http://127.0.0.1:8000** — that one URL serves both the UI and the API.
-SQLite is used automatically if `DATABASE_URL` isn't set, so you don't need
+The example `.env` configures a local SQLite database, so you don't need
 Postgres running locally just to try it out. A temporary signing key is generated
 for local development; generate and set `SECRET_KEY` in your local `.env` if you
 want sessions to survive application restarts. Run the automated tests and

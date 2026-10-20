@@ -4,11 +4,23 @@ from pydantic import ValidationError
 from app.config import Settings
 
 
+def development_settings(**overrides):
+    values = {
+        "app_env": "development",
+        "database_url": "sqlite:///./pybasics_dev.db",
+        "access_token_expire_minutes": 720,
+        "cors_origins": "http://localhost:8000,http://127.0.0.1:8000",
+    }
+    values.update(overrides)
+    return Settings(_env_file=None, **values)
+
+
 def production_settings(**overrides):
     values = {
         "app_env": "production",
         "database_url": "postgresql://user:password@db.example.test:5432/pybasics",
         "secret_key": "a-unique-production-secret-that-is-at-least-32-chars",
+        "access_token_expire_minutes": 720,
         "cors_origins": "https://learn.example.test, https://admin.example.test/",
     }
     values.update(overrides)
@@ -16,7 +28,7 @@ def production_settings(**overrides):
 
 
 def test_development_defaults_are_convenient_and_not_wildcard():
-    settings = Settings(_env_file=None)
+    settings = development_settings()
 
     assert settings.app_env == "development"
     assert settings.database_url.startswith("sqlite:///")
@@ -27,8 +39,8 @@ def test_development_defaults_are_convenient_and_not_wildcard():
 
 
 def test_development_secret_is_generated_and_not_a_fixed_placeholder():
-    first = Settings(_env_file=None)
-    second = Settings(_env_file=None)
+    first = development_settings()
+    second = development_settings()
 
     assert len(first.secret_key) >= 32
     assert first.secret_key != second.secret_key
@@ -74,6 +86,7 @@ def test_production_rejects_implicit_secret():
             _env_file=None,
             app_env="production",
             database_url="postgresql://user:password@db.example.test:5432/pybasics",
+            access_token_expire_minutes=720,
             cors_origins="https://learn.example.test",
         )
 
@@ -84,6 +97,7 @@ def test_production_rejects_implicit_database_url():
             _env_file=None,
             app_env="production",
             secret_key="a-unique-production-secret-that-is-at-least-32-chars",
+            access_token_expire_minutes=720,
             cors_origins="https://learn.example.test",
         )
 
@@ -94,10 +108,11 @@ def test_production_rejects_implicit_cors_origins():
             _env_file=None,
             app_env="production",
             database_url="postgresql://user:password@db.example.test:5432/pybasics",
+            access_token_expire_minutes=720,
             secret_key="a-unique-production-secret-that-is-at-least-32-chars",
         )
 
 
 def test_invalid_environment_is_rejected():
     with pytest.raises(ValidationError, match="APP_ENV"):
-        Settings(_env_file=None, app_env="prod")
+        development_settings(app_env="prod")

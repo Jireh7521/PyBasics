@@ -1,7 +1,7 @@
 from functools import lru_cache
 import secrets
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # Convenient for local development only; production validation rejects it.
     # Generate an ephemeral development key instead of embedding a fixed secret.
     # Set SECRET_KEY in the local .env file if sessions should survive restarts.
-    secret_key: str = secrets.token_urlsafe(32)
+    secret_key: str = Field(default_factory=secrets.token_urlsafe)
     access_token_expire_minutes: int = 720
     cors_origins: str = "http://localhost:8000,http://127.0.0.1:8000"
 

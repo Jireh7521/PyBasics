@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - feature/recover-fullstack
+      - fix/issue-3-production-config
+      - fix/issue-4-sandbox-safety
     paths:
       - "pybasics-fullstack/backend/**"
       - ".github/workflows/backend-tests.yml"

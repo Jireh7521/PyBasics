@@ -142,9 +142,9 @@ Open **http://127.0.0.1:8000** — that one URL serves both the UI and the API.
 SQLite is used automatically if `DATABASE_URL` isn't set, so you don't need
 Postgres running locally just to try it out. A temporary signing key is generated
 for local development; generate and set `SECRET_KEY` in your local `.env` if you
-want sessions to survive application restarts. The whole flow (signup → course
-→ exam → certificate, including the sandboxed code grading) was verified
-against this exact setup.
+want sessions to survive application restarts. Run the automated tests and
+complete the manual signup → course → exam → certificate flow before treating
+the setup as verified.
 
 ## Production configuration safety
 

@@ -134,13 +134,15 @@ cd backend
 python3 -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env            # defaults to a local SQLite file if you don't set DATABASE_URL
+cp .env.example .env            # local SQLite defaults; no secret is stored in the example file
 uvicorn app.main:app --reload
 ```
 
 Open **http://127.0.0.1:8000** — that one URL serves both the UI and the API.
 SQLite is used automatically if `DATABASE_URL` isn't set, so you don't need
-Postgres running locally just to try it out. The whole flow (signup → course
+Postgres running locally just to try it out. A temporary signing key is generated
+for local development; generate and set `SECRET_KEY` in your local `.env` if you
+want sessions to survive application restarts. The whole flow (signup → course
 → exam → certificate, including the sandboxed code grading) was verified
 against this exact setup.
 
@@ -148,10 +150,12 @@ against this exact setup.
 
 Production startup requires explicitly configured `SECRET_KEY`,
 `DATABASE_URL`, and `CORS_ORIGINS`. The secret must be a unique random value
-of at least 32 characters; the local development fallback is rejected in
-production. Production configuration also rejects SQLite and wildcard or empty
-CORS origins. These checks help prevent accidental unsafe defaults, but do
-not replace a security review.
+of at least 32 characters. No fixed secret is embedded in the application: local
+development generates a temporary key at startup, so sessions do not survive
+restarts unless you set your own generated `SECRET_KEY` in your untracked
+`.env` file. Production configuration rejects missing or unsafe secrets,
+SQLite, and wildcard or empty CORS origins. These checks help prevent accidental
+unsafe defaults, but do not replace a security review.
 
 Generate a secret locally with:
 

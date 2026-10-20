@@ -24,12 +24,6 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      APP_ENV: development
-      DATABASE_URL: sqlite:////tmp/pybasics-ci.db
-      ACCESS_TOKEN_EXPIRE_MINUTES: "720"
-      CORS_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
-      CODE_EXECUTION_ENABLED: "false"
     defaults:
       run:
         working-directory: pybasics-fullstack/backend

@@ -31,6 +31,7 @@ def test_development_configuration_is_not_wildcard():
     settings = development_settings()
 
     assert settings.app_env == "development"
+    assert settings.code_execution_enabled is False
     assert settings.database_url.startswith("sqlite:///")
     assert settings.cors_origin_list == [
         "http://localhost:8000",
@@ -70,6 +71,7 @@ def test_production_accepts_explicit_safe_configuration():
         ({"database_url": ""}, "DATABASE_URL"),
         ({"database_url": "sqlite:///./pybasics_dev.db"}, "not SQLite"),
         ({"cors_origins": ""}, "CORS_ORIGINS"),
+        ({"code_execution_enabled": True}, "CODE_EXECUTION_ENABLED"),
         ({"cors_origins": "*"}, "cannot contain '*'"),
         ({"cors_origins": "https://learn.example.test,*"}, "cannot contain '*'"),
     ],

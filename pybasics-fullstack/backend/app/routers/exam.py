@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from .. import models, schemas, security
+from ..config import get_settings
 from ..database import get_db
 from ..content.exam_mcq import MCQ_POOLS
 from ..content.exam_code import CODE_POOLS
@@ -76,6 +77,11 @@ def start_level(level: int, user: models.User = Depends(security.get_current_use
     lv = LEVELS_BY_ID.get(level)
     if not lv:
         raise HTTPException(status_code=404, detail="No such level.")
+    if lv["type"] == "code" and not get_settings().code_execution_enabled:
+        raise HTTPException(
+            status_code=503,
+            detail="Code challenges are temporarily unavailable while the execution sandbox is under security review.",
+        )
     course_done = course_is_complete(user, db)
     progress = _level_progress_map(user, db)
     if _level_status(level, progress, course_done) == "locked":
@@ -183,6 +189,12 @@ def answer_code(attempt_id: int, body: schemas.CodeAnswerSubmit,
     if lv["type"] != "code":
         raise HTTPException(status_code=400, detail="This attempt is not a code level.")
     q = attempt.questions_json[attempt.current_index]
+
+    if not get_settings().code_execution_enabled:
+        raise HTTPException(
+            status_code=503,
+            detail="Code execution is disabled until the sandbox has independent security approval.",
+        )
 
     run = run_user_code(body.code)
     var_results = []

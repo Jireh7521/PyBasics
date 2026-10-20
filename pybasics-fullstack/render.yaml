@@ -27,3 +27,5 @@ services:
         value: "720"
       - key: CORS_ORIGINS
         sync: false
+      - key: CODE_EXECUTION_ENABLED
+        value: "false"

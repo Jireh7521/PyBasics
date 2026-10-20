@@ -1,0 +1,40 @@
+name: Backend tests
+
+on:
+  pull_request:
+    branches:
+      - feature/recover-fullstack
+      - fix/issue-3-production-config
+      - fix/issue-4-sandbox-safety
+    paths:
+      - "pybasics-fullstack/backend/**"
+      - ".github/workflows/backend-tests.yml"
+  push:
+    branches:
+      - fix/issue-3-production-config
+    paths:
+      - "pybasics-fullstack/backend/**"
+      - ".github/workflows/backend-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pybasics-fullstack/backend
+    steps:
+      - name: Check out repository branch
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pybasics-fullstack/backend/requirements.txt
+      - name: Install pinned application dependencies and test runner
+        run: python -m pip install -r requirements.txt pytest==8.3.3
+      - name: Run backend test suite
+        run: python -m pytest -q

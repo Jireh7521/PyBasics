@@ -134,15 +134,39 @@ cd backend
 python3 -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env            # defaults to a local SQLite file if you don't set DATABASE_URL
+cp .env.example .env            # local SQLite defaults; no secret is stored in the example file
 uvicorn app.main:app --reload
 ```
 
 Open **http://127.0.0.1:8000** — that one URL serves both the UI and the API.
-SQLite is used automatically if `DATABASE_URL` isn't set, so you don't need
-Postgres running locally just to try it out. The whole flow (signup → course
-→ exam → certificate, including the sandboxed code grading) was verified
-against this exact setup.
+The example `.env` configures a local SQLite database, so you don't need
+Postgres running locally just to try it out. A temporary signing key is generated
+for local development; generate and set `SECRET_KEY` in your local `.env` if you
+want sessions to survive application restarts. Run the automated tests and
+complete the manual signup → course → exam → certificate flow before treating
+the setup as verified.
+
+## Production configuration safety
+
+Production startup requires explicitly configured `SECRET_KEY`,
+`DATABASE_URL`, and `CORS_ORIGINS`. The secret must be a unique random value
+of at least 32 characters. No fixed secret is embedded in the application: local
+development generates a temporary key at startup, so sessions do not survive
+restarts unless you set your own generated `SECRET_KEY` in your untracked
+`.env` file. Production configuration rejects missing or unsafe secrets,
+SQLite, and wildcard or empty CORS origins. These checks help prevent accidental
+unsafe defaults, but do not replace a security review.
+
+Generate a secret locally with:
+
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Do not commit real secrets or production `.env` files. Configure secrets in
+your hosting provider's environment settings instead. The included Render
+Blueprint generates `SECRET_KEY` and prompts you for `CORS_ORIGINS`; provide
+the exact origin used by your frontend.
 
 ## Deploying to Render (free tier)
 
@@ -172,8 +196,11 @@ at this repo, and it creates both resources for you with sensible defaults
    - `SECRET_KEY` — any long random string. Generate one locally with
      `python -c "import secrets; print(secrets.token_hex(32))"`
    - `ACCESS_TOKEN_EXPIRE_MINUTES` — `720` (or whatever you prefer)
-   - `CORS_ORIGINS` — `*` is fine since the frontend is served from the same
-     origin as the API in this setup
+   - `APP_ENV` — set to `production`.
+   - `CORS_ORIGINS` — set to the exact frontend origin(s), comma-separated,
+     including the scheme (for example, `https://learn.example.com`). Do not
+     use `*`; credentialed CORS must use explicit origins. If the frontend is
+     served from this same web service, use that service's actual HTTPS URL.
 5. **Deploy.** Render builds and starts it automatically; watch the Logs tab
    for `Application startup complete.` The database tables are created
    automatically on first startup (`Base.metadata.create_all`).

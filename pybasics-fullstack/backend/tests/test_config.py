@@ -91,7 +91,7 @@ def test_production_rejects_implicit_secret():
 
 
 def test_production_rejects_implicit_database_url():
-    with pytest.raises(ValidationError, match="DATABASE_URL"):
+    with pytest.raises(ValidationError, match="database_url"):
         Settings(
             _env_file=None,
             app_env="production",
@@ -102,7 +102,7 @@ def test_production_rejects_implicit_database_url():
 
 
 def test_production_rejects_implicit_cors_origins():
-    with pytest.raises(ValidationError, match="CORS_ORIGINS"):
+    with pytest.raises(ValidationError, match="cors_origins"):
         Settings(
             _env_file=None,
             app_env="production",

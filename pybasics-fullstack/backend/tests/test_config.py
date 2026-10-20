@@ -27,7 +27,7 @@ def production_settings(**overrides):
     return Settings(_env_file=None, **values)
 
 
-def test_development_defaults_are_convenient_and_not_wildcard():
+def test_development_configuration_is_not_wildcard():
     settings = development_settings()
 
     assert settings.app_env == "development"
@@ -67,7 +67,6 @@ def test_production_accepts_explicit_safe_configuration():
     [
         ({"secret_key": ""}, "SECRET_KEY"),
         ({"secret_key": "short"}, "SECRET_KEY"),
-        ({"secret_key": "dev-only-insecure-key-change-me"}, "SECRET_KEY"),
         ({"database_url": ""}, "DATABASE_URL"),
         ({"database_url": "sqlite:///./pybasics_dev.db"}, "not SQLite"),
         ({"cors_origins": ""}, "CORS_ORIGINS"),

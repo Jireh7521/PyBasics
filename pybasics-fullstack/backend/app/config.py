@@ -1,5 +1,6 @@
 import secrets
 from functools import lru_cache
+from urllib.parse import urlsplit
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -13,6 +14,27 @@ _INSECURE_SECRETS = {
     "secret-key",
     "change-this-to-a-long-random-string",
 }
+
+
+def _validate_production_secret(secret: str) -> bool:
+    """Reject weak-looking secrets; length alone is not a strength guarantee."""
+    normalized = secret.strip().lower()
+    if len(secret.strip()) < 32 or normalized in _INSECURE_SECRETS:
+        return False
+
+    # Generated secrets (for example secrets.token_hex(32)) have many distinct
+    # characters. This inexpensive guard rejects long repeated/patterned values.
+    if len(set(normalized)) < 12:
+        return False
+
+    # Reject short patterns repeated to fill the secret. Random secrets can
+    # contain repeats, but are extremely unlikely to consist entirely of one.
+    for width in range(1, min(8, len(normalized) // 2) + 1):
+        pattern = normalized[:width]
+        if len(normalized) % width == 0 and pattern * (len(normalized) // width) == normalized:
+            return False
+
+    return True
 
 
 class Settings(BaseSettings):
@@ -37,11 +59,10 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "SECRET_KEY must be explicitly configured when APP_ENV=production."
                 )
-            secret = self.secret_key.strip()
-            if len(secret) < 32 or secret.lower() in _INSECURE_SECRETS:
+            if not _validate_production_secret(self.secret_key):
                 raise ValueError(
-                    "SECRET_KEY is unsafe for production; provide a unique random secret "
-                    "of at least 32 characters."
+                    "SECRET_KEY is unsafe for production; provide a unique random "
+                    "secret of at least 32 characters with sufficient character diversity."
                 )
             if not self.database_url.strip():
                 raise ValueError(
@@ -60,6 +81,26 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "CORS_ORIGINS cannot contain '*' when APP_ENV=production."
                 )
+            for origin in origins:
+                parsed = urlsplit(origin)
+                try:
+                    valid_port = parsed.port is None or 1 <= parsed.port <= 65535
+                except ValueError:
+                    valid_port = False
+                if (
+                    parsed.scheme != "https"
+                    or not parsed.hostname
+                    or parsed.username is not None
+                    or parsed.password is not None
+                    or parsed.path
+                    or parsed.query
+                    or parsed.fragment
+                    or not valid_port
+                ):
+                    raise ValueError(
+                        "Each production CORS origin must be an HTTPS origin "
+                        "containing only a scheme, host, and optional valid port."
+                    )
 
         return self
 

@@ -18,8 +18,7 @@ _INSECURE_SECRETS = {
 class Settings(BaseSettings):
     app_env: str
     database_url: str
-    # Convenient for local development only; production validation rejects it.
-    # Generate an ephemeral development key instead of embedding a fixed secret.
+    # Never embed a fixed secret; local runs get an ephemeral key.
     # Set SECRET_KEY in the local .env file if sessions should survive restarts.
     secret_key: str = Field(default_factory=secrets.token_urlsafe)
     access_token_expire_minutes: int

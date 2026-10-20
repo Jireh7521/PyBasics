@@ -43,6 +43,7 @@ def test_production_accepts_explicit_safe_configuration():
         ({"secret_key": "short"}, "SECRET_KEY"),
         ({"secret_key": "dev-only-insecure-key-change-me"}, "SECRET_KEY"),
         ({"database_url": ""}, "DATABASE_URL"),
+        ({"database_url": "sqlite:///./pybasics_dev.db"}, "not SQLite"),
         ({"cors_origins": ""}, "CORS_ORIGINS"),
         ({"cors_origins": "*"}, "cannot contain '*'"),
         ({"cors_origins": "https://learn.example.test,*"}, "cannot contain '*'"),

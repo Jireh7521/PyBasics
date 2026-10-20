@@ -67,11 +67,17 @@ def test_production_accepts_explicit_safe_configuration():
     [
         ({"secret_key": ""}, "SECRET_KEY"),
         ({"secret_key": "short"}, "SECRET_KEY"),
+        ({"secret_key": "a" * 64}, "SECRET_KEY"),
+        ({"secret_key": "abcd" * 16}, "SECRET_KEY"),
         ({"database_url": ""}, "DATABASE_URL"),
         ({"database_url": "sqlite:///./pybasics_dev.db"}, "not SQLite"),
         ({"cors_origins": ""}, "CORS_ORIGINS"),
         ({"cors_origins": "*"}, "cannot contain '*'"),
         ({"cors_origins": "https://learn.example.test,*"}, "cannot contain '*'"),
+        ({"cors_origins": "http://learn.example.test"}, "HTTPS origin"),
+        ({"cors_origins": "https://learn.example.test/path"}, "HTTPS origin"),
+        ({"cors_origins": "https://learn.example.test?x=1"}, "HTTPS origin"),
+        ({"cors_origins": "https://learn.example.test:99999"}, "HTTPS origin"),
     ],
 )
 def test_production_rejects_missing_or_unsafe_configuration(overrides, message):

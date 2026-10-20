@@ -31,6 +31,12 @@ def on_startup():
     Base.metadata.create_all(bind=engine)
 
 
+@app.get("/health")
+def health():
+    """Report process liveness; this does not prove database readiness."""
+    return {"status": "ok"}
+
+
 FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend"
 if FRONTEND_DIR.exists():
     app.mount("/assets", StaticFiles(directory=FRONTEND_DIR), name="assets")

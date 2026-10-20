@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     secret_key: str = Field(default_factory=secrets.token_urlsafe)
     access_token_expire_minutes: int
     cors_origins: str
+    # Fail closed: code execution must remain disabled until a separately
+    # isolated runner has passed independent security review.
+    code_execution_enabled: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -60,6 +63,11 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "CORS_ORIGINS cannot contain '*' when APP_ENV=production."
                 )
+            if self.code_execution_enabled:
+                raise ValueError(
+                    "CODE_EXECUTION_ENABLED must be false in production until the "
+                    "learner-code runner has independent security approval."
+                )
 
         return self
 
@@ -75,7 +83,6 @@ class Settings(BaseSettings):
     def cors_origin_list(self) -> list[str]:
         origins = self._parse_origins(self.cors_origins)
         if "*" in origins and self.is_production:
-            # Defensive guard in case settings validation is bypassed in future.
             raise ValueError("Wildcard CORS origins are not allowed in production.")
         return origins
 

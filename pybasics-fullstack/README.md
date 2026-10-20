@@ -9,9 +9,8 @@ on a real server instead of the browser's local storage, which means:
   same progress you had on your laptop).
 - Passwords are hashed with bcrypt before they're ever stored.
 - The exam's correct answers are **never sent to the browser** — multiple-choice
-  questions omit the correct option, and Level 4/5 code challenges are graded
-  by actually *running* the submitted code, server-side, inside a locked-down
-  sandbox. Reading the page's source or the network tab doesn't reveal answers
+  questions omit the correct option, and Level 4/5 code execution is currently disabled by default pending an
+  independent security review of the learner-code runner. Reading the page's source or the network tab doesn't reveal answers
   the way it did in the old static-HTML version.
 - The "leave the exam → logged out" rule is now enforced on the server too: a
   detected tab-switch calls `/exam/attempt/{id}/abandon`, which marks that
@@ -85,22 +84,19 @@ The frontend only ever receives the sanitized version. Each answer is graded
 against that stored copy, one question at a time, so there's no way to see
 upcoming questions or answers in advance.
 
-**Level 4 and 5 (write-the-code challenges)** are graded by actually running
-the submitted code through `sandbox.py`:
-1. The code is parsed with Python's `ast` module and checked against a strict
-   whitelist — only assignment/expression lines, a small set of builtins
-   (`len`, `str`, `int`, `round`, …) and string/list/dict methods are allowed.
-   No `import`, no `def`/`class`, no loops, no file or network access.
-2. It's then executed in a **separate subprocess** with a 2-second CPU-time
-   limit and a 256MB memory limit, so even something that slips past the
-   whitelist (or just a huge computation) can't hang or crash the server.
-3. The resulting variables are compared against the expected values.
+**Level 4 and 5 (write-the-code challenges)** use a Python AST allowlist and a
+child process in the current implementation, but these measures do not provide
+a proven security boundary. The runner may inherit the application user's
+filesystem access, environment, and network access; resource and IPC behavior
+also vary by platform. Therefore code levels are **disabled by default**. The
+application rejects attempts to start code levels while disabled, and
+production settings reject enabling the runner until an independent security
+review accepts the risk or a stronger isolated runner replaces it.
 
-This was fuzz-tested during development: all 7 MCQ generators and all 13 code
-generators were run dozens of times each to confirm they always produce valid
-questions, and the sandbox was confirmed to block `import os`, `def`, `while
-True`, dunder access, and oversized memory use, while still correctly
-accepting legitimate solutions (including list comprehensions and f-strings).
+See [SECURITY_SANDBOX.md](SECURITY_SANDBOX.md) for the threat model, known
+limitations, test coverage, and release gates. The current tests are regression
+checks, not evidence that hostile code can be safely run. Do not expose the
+runner publicly or enable it in production before the release gates are met.
 
 ### Exam lockdown
 While a quiz question is on screen, the frontend disables copy/paste,
@@ -140,7 +136,7 @@ uvicorn app.main:app --reload
 
 Open **http://127.0.0.1:8000** — that one URL serves both the UI and the API.
 The example `.env` configures a local SQLite database, so you don't need
-Postgres running locally just to try it out. A temporary signing key is generated
+Postgres running locally just to try it out. Code execution remains disabled by default. A temporary signing key is generated
 for local development; generate and set `SECRET_KEY` in your local `.env` if you
 want sessions to survive application restarts. Run the automated tests and
 complete the manual signup → course → exam → certificate flow before treating

@@ -26,6 +26,20 @@ def test_development_defaults_are_convenient_and_not_wildcard():
     ]
 
 
+def test_development_secret_is_generated_and_not_a_fixed_placeholder():
+    first = Settings(_env_file=None)
+    second = Settings(_env_file=None)
+
+    assert len(first.secret_key) >= 32
+    assert first.secret_key != second.secret_key
+    assert first.secret_key.lower() not in {
+        "change-me",
+        "changeme",
+        "secret",
+        "secret-key",
+    }
+
+
 def test_production_accepts_explicit_safe_configuration():
     settings = production_settings()
 

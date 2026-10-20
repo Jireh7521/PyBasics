@@ -47,6 +47,10 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "DATABASE_URL must be explicitly configured when APP_ENV=production."
                 )
+            if self.database_url.strip().lower().startswith("sqlite"):
+                raise ValueError(
+                    "DATABASE_URL must use a production database, not SQLite, when APP_ENV=production."
+                )
             if "cors_origins" not in self.model_fields_set:
                 raise ValueError(
                     "CORS_ORIGINS must be explicitly configured when APP_ENV=production."

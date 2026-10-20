@@ -1,5 +1,5 @@
 # Render Blueprint: PostgreSQL database plus FastAPI web service.
-# Confirm the public service URL and adjust CORS_ORIGINS in the Render dashboard.
+# Render will ask for the exact frontend origin; do not use a wildcard.
 databases:
   - name: pybasics-db
     plan: free
@@ -26,4 +26,4 @@ services:
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "720"
       - key: CORS_ORIGINS
-        value: "https://pybasics-api.onrender.com"
+        sync: false

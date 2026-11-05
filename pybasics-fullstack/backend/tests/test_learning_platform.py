@@ -141,9 +141,10 @@ def test_exam_question_does_not_expose_answer_key_and_certificate_is_gated(app_c
 
     db = session_factory()
     try:
+        user = db.query(models.User).filter_by(username="learner_one").one()
         attempt = (
             db.query(models.ExamAttempt)
-            .filter_by(user_id=1, level=1)
+            .filter_by(user_id=user.id, level=1)
             .one()
         )
         assert "correct" in attempt.questions_json[0]

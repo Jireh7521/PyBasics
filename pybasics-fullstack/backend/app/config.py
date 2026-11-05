@@ -16,7 +16,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    environment: str = "development"
+    environment: str = "production"
     database_url: str = "sqlite:///./pybasics_dev.db"
     secret_key: str = _DEVELOPMENT_SECRET
     access_token_expire_minutes: int = 720

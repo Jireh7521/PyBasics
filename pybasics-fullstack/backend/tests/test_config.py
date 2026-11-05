@@ -42,6 +42,17 @@ def test_production_rejects_a_weak_secret():
         )
 
 
+def test_production_rejects_a_repetitive_low_entropy_secret():
+    with pytest.raises(ValidationError, match="at least 32 UTF-8 bytes"):
+        Settings(
+            _env_file=None,
+            environment="production",
+            database_url="postgresql://user:password@db.example.test/pybasics",
+            secret_key="a" * 64,
+            cors_origins="https://learn.example.test",
+        )
+
+
 def test_production_rejects_the_sqlite_development_database():
     with pytest.raises(ValidationError, match="requires DATABASE_URL"):
         Settings(

@@ -58,7 +58,7 @@ def test_production_rejects_the_sqlite_development_database():
         Settings(
             _env_file=None,
             environment="production",
-            secret_key="s" * 64,
+            secret_key="strong-test-secret-value-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ",
             cors_origins="https://learn.example.test",
         )
 
@@ -69,7 +69,7 @@ def test_production_requires_explicit_cors_origins():
             _env_file=None,
             environment="production",
             database_url="postgresql://user:password@db.example.test/pybasics",
-            secret_key="s" * 64,
+            secret_key="strong-test-secret-value-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         )
 
 
@@ -79,7 +79,7 @@ def test_production_rejects_wildcard_cors():
             _env_file=None,
             environment="production",
             database_url="postgresql://user:password@db.example.test/pybasics",
-            secret_key="s" * 64,
+            secret_key="strong-test-secret-value-0123456789-ABCDEFGHIJKLMNOPQRSTUVWXYZ",
             cors_origins="*",
         )
 

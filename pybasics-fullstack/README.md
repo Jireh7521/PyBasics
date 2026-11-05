@@ -185,11 +185,13 @@ at this repo, and it creates both resources for you with sensible defaults
 4. **Set environment variables** on the web service (Render's "Environment"
    tab):
    - `DATABASE_URL` — the Internal Database URL from step 2
-   - `SECRET_KEY` — any long random string. Generate one locally with
-     `python -c "import secrets; print(secrets.token_hex(32))"`
-   - `ACCESS_TOKEN_EXPIRE_MINUTES` — `720` (or whatever you prefer)
-   - `CORS_ORIGINS` — `*` is fine since the frontend is served from the same
-     origin as the API in this setup
+   - `ENVIRONMENT` — `production`
+   - `SECRET_KEY` — a unique random value of at least 32 bytes. Generate one
+     locally with `python -c "import secrets; print(secrets.token_hex(32))"`
+   - `ACCESS_TOKEN_EXPIRE_MINUTES` — `720` (or another positive value)
+   - `CORS_ORIGINS` — the exact HTTPS origin(s) of your frontend, separated
+     by commas. Never use `*` in production. If you use a custom domain or
+     Render assigns a different service URL, update this value to match it.
 5. **Deploy.** Render builds and starts it automatically; watch the Logs tab
    for `Application startup complete.` The database tables are created
    automatically on first startup (`Base.metadata.create_all`).

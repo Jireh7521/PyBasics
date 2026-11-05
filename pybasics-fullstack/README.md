@@ -140,7 +140,7 @@ uvicorn app.main:app --reload
 ```
 
 Open **http://127.0.0.1:8000** — that one URL serves both the UI and the API.
-The local environment file selects SQLite, so you don't need PostgreSQL running locally just to try the application. Runtime and browser verification must still be recorded separately; a successful dependency installation alone does not prove the full signup-to-certificate flow works.
+The checked-in `.env.example` explicitly selects development mode, a local SQLite database, and a development-only secret, so you don't need PostgreSQL running locally. If `ENVIRONMENT` is absent, the application defaults to production mode and fails startup until production settings are supplied. Never reuse the example secret in a deployed environment. Runtime and browser verification must still be recorded separately; a successful dependency installation alone does not prove the full signup-to-certificate flow works.
 
 ## Automated tests
 

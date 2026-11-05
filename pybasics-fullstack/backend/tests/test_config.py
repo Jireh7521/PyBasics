@@ -4,7 +4,8 @@ from pydantic import ValidationError
 from app.config import Settings
 
 
-def test_missing_environment_fails_closed():
+def test_missing_environment_fails_closed(monkeypatch):
+    monkeypatch.delenv("ENVIRONMENT", raising=False)
     with pytest.raises(ValidationError, match="Production requires SECRET_KEY"):
         Settings(_env_file=None)
 

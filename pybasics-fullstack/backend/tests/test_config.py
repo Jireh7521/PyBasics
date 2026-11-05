@@ -4,8 +4,13 @@ from pydantic import ValidationError
 from app.config import Settings
 
 
+def test_missing_environment_fails_closed():
+    with pytest.raises(ValidationError, match="Production requires SECRET_KEY"):
+        Settings(_env_file=None)
+
+
 def test_development_configuration_has_local_defaults():
-    settings = Settings(_env_file=None)
+    settings = Settings(_env_file=None, environment="development")
 
     assert settings.environment == "development"
     assert settings.database_url.startswith("sqlite:///")

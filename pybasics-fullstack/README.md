@@ -150,9 +150,10 @@ From the backend directory, install the pinned dependencies and run:
 python -m pytest -q
 ```
 
-The current suite covers registration/login, authenticated profiles, lesson
-answer-key privacy, lesson progress, exam access gating, exam answer-key
-privacy, certificate eligibility, and the sandbox's oversized-input guard.
+The current suite covers development/production configuration validation,
+registration/login, authenticated profiles, lesson answer-key privacy, lesson
+progress, exam access gating and server-side grading, exam answer-key privacy,
+certificate eligibility, and the sandbox's oversized-input guard.
 The sandbox test does not establish process isolation or prove that arbitrary
 untrusted Python is safe to execute. Public code execution remains blocked
 until the separate sandbox security review in issue #4 is complete.

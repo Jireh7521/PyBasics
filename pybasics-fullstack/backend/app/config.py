@@ -58,9 +58,12 @@ class Settings(BaseSettings):
         if self.environment != "production":
             return self
 
+        secret = self.secret_key.strip()
         if (
-            self.secret_key == _DEVELOPMENT_SECRET
-            or len(self.secret_key.encode("utf-8")) < 32
+            secret != self.secret_key
+            or secret == _DEVELOPMENT_SECRET
+            or len(secret.encode("utf-8")) < 32
+            or len(set(secret)) < 8
         ):
             raise ValueError(
                 "Production requires SECRET_KEY to be a unique random value "

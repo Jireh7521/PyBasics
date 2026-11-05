@@ -156,6 +156,34 @@ def test_exam_question_does_not_expose_answer_key_and_certificate_is_gated(app_c
     assert certificate.json()["eligible"] is False
 
 
+
+def test_exam_grades_an_answer_against_server_stored_key(app_client):
+    client, session_factory = app_client
+    token = _signup(client)
+    _complete_course(session_factory, "learner_one")
+
+    start = client.post("/api/exam/level/1/start", headers=_auth(token))
+    assert start.status_code == 200
+    attempt_id = start.json()["attempt_id"]
+
+    db = session_factory()
+    try:
+        attempt = db.query(models.ExamAttempt).filter_by(id=attempt_id).one()
+        correct_option = attempt.questions_json[0]["correct"]
+    finally:
+        db.close()
+
+    answer = client.post(
+        f"/api/exam/attempt/{attempt_id}/answer/mcq",
+        headers=_auth(token),
+        json={"selected": correct_option},
+    )
+
+    assert answer.status_code == 200
+    assert answer.json()["correct"] is True
+    assert answer.json()["score"] == 1
+    assert answer.json()["finished"] is False
+
 def test_sandbox_rejects_oversized_submission_before_execution():
     result = run_user_code("x" * 4001)
 

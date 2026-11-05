@@ -40,6 +40,7 @@ pybasics-fullstack/
 │   │       ├── course.py      /api/course/status, /day/{n}, /day/{n}/submit
 │   │       └── exam.py        /api/exam/overview, /level/{n}/start, /attempt/..., /certificate
 │   ├── requirements.txt
+│   └── tests/                 API, course, exam, and validation regression tests
 │   ├── .env.example
 │   └── Procfile
 ├── frontend/
@@ -139,10 +140,25 @@ uvicorn app.main:app --reload
 ```
 
 Open **http://127.0.0.1:8000** — that one URL serves both the UI and the API.
-SQLite is used automatically if `DATABASE_URL` isn't set, so you don't need
-Postgres running locally just to try it out. The whole flow (signup → course
-→ exam → certificate, including the sandboxed code grading) was verified
-against this exact setup.
+The local environment file selects SQLite, so you don't need PostgreSQL running locally just to try the application. Runtime and browser verification must still be recorded separately; a successful dependency installation alone does not prove the full signup-to-certificate flow works.
+
+## Automated tests
+
+From the backend directory, install the pinned dependencies and run:
+
+```bash
+python -m pytest -q
+```
+
+The current suite covers registration/login, authenticated profiles, lesson
+answer-key privacy, lesson progress, exam access gating, exam answer-key
+privacy, certificate eligibility, and the sandbox's oversized-input guard.
+The sandbox test does not establish process isolation or prove that arbitrary
+untrusted Python is safe to execute. Public code execution remains blocked
+until the separate sandbox security review in issue #4 is complete.
+
+GitHub Actions runs this test command on pushes to the working branch and
+on pull requests targeting `main`.
 
 ## Deploying to Render (free tier)
 
